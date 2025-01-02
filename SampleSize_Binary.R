@@ -7,8 +7,12 @@ library(DT)
 library(dplyr)
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Estimating the Error Rate of Algorithm", titleWidth = 400),
+  dashboardHeader(title = "Binary variable: Sample Size Estimator", titleWidth = 400),
   dashboardSidebar(
+    tags$div(
+      tags$img(src = "https://health.ucdavis.edu/data/includes/images/Img-cdev/icons/hac-logo.png", height = "100px"),
+      style = "text-align: center; padding: 10px;"
+    ),
     sidebarMenu(
       menuItem("Introduction", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Plan Sample Size", tabName = "sample_size", icon = icon("th")),
@@ -22,50 +26,57 @@ ui <- dashboardPage(
       tabItem(tabName = "dashboard",
         h1("Introduction"),
         div(
-          p(HTML("<span style='font-size: 20px;'>This application provides guidance on the number of records to review to validate a data asset algorithm and estimate the error rate of the algorithm with confidence intervals.</span>")),
-          p(HTML("<span style='font-size: 20px;'>There are three scenarios for sample size considerations and error determinations:</span>")),
+          p(HTML("<span style='font-size: 20px;'>This tool helps you decide how many records to review to evaluate the performance of a binary data asset algorithm. It also estimates the algorithm’s error rate for a binary variable, providing a range (called a confidence interval) to show how precise the estimate is.</span>")),
+          p(HTML("<span style='font-size: 20px;'>Use this tool for binary variables which are variables that take on one of two values (e.g., yes/no, lived/died, female/male).</span>")),
+          p(HTML("<span style='font-size: 20px;'>There are three main functions in the tool:</span>")),
           tags$ol(
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Plan Sample Size</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Defined Sample Size Tab</strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>If you want to understand how the number of records reviewed will affect the confidence interval of the error rate estimation.</span>")
+                HTML("<span style='font-size: 20px;'>Use this tab if you know the number of records you can review. This tab will show you how precisely you will be able to estimate your error rate with this sample size.</span>")
               ))
             ),
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Error Rate Confidence</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Error Rate Confidence Tab</strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>If you need to estimate the error rate and have high confidence that the true error rate is below a specified threshold.</span>")
+                HTML("<span style='font-size: 20px;'>Use this tab if you need to determine if the algorithm’s error rate is below a specific limit and want a high level of certainty about your results.</span>")
               ))
             ),
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Error Rate Estimation</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Error Rate Estimation Tab</strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>	If you wish to estimate the algorithm's error rate with a confidence level, after you have validated the records against a source of truth and determined the number of errors in the sample.</span>")
+                HTML("<span style='font-size: 20px;'>Once you have reviewed a sample of records, use this tab to estimate the algorithm's error rate. You'll enter the number of records you checked and how many errors you found to get an estimate of the error rate.</span>")
               ))
             )
           )
         ),
         fluidRow(
-          column(12, h2("Definitions:") ),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>True error rate</u> - This is the true percentage of errors in the full data set. This value can only be known with certainty if all records are validated and every data point evaluated.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Estimated error rate</u> - This is the estimated error rate from our sample, and it provides the best estimate of what the true error rate is. Because we cannot review every record in the data set, we draw a sample and use it to estimate the true error rate. </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Anticipated error rate</u> - This is what you think the error rate will be after you validate the data. It won't be known until you actually do the validation, but the sample size calculator requires you make an informed guess on the error rate you would expect. You can use the best judgement of the Subject Matter Experts as well as results from previous data exploration and targeted reviews.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>95% Confidence interval</u> - The 95% confidence interval identifies the range in which the true error rate occurs 95% of the time. The 95% confidence interval is defined by a lower and upper limit.</p></span>")),
-          column(12, h2("A note on sampling and estimating the true error rate:")),
-          column(12, HTML("<span style='font-size: 20px;'><p>Because we cannot validate every record and data point, we draw a smaller sample and use that sample to estimate the true error rate in the entire population. But each time we draw a sample, the percentage of errors in the sample will vary and thus our estimate of the true error rate will vary. Further, due to this sampling variability, the estimated error rate of the sample can differ from the true error rate (if we were to validate every record). </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><p>To account for sampling variability, we calculate a confidence interval. The confidence interval reflects the range in which our estimated error rates would fall 95% of the time if we repeated the sampling many times. We expect the true error rate to be within this confidence interval 95% of the time. </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><p>With larger sample sizes we are less likely to get estimated error rates that differ markedly from the true error rate. As a result, the confidence interval is narrower leading to greater certainty about the range of possible values for the true error rate.  </p></span>"))
+          column(12, h2("Key Terms") ),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>True error rate</u>: The actual percentage of errors in the entire dataset. You can only know this for sure if you check every single record, which is usually impractical.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Estimated error rate</u>: The percentage of errors found in the sample you reviewed. </p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Anticipated error rate</u>: Your informed estimate of what the error rate might be before reviewing any records. This guess helps calculate the sample size and can be based on expert input or prior reviews.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>95% Confidence interval</u>: The range where the true error rate is expected to fall 95% of the time. It provides upper and lower limits for your estimate, helping you understand how precise your results are.</p></span>")),
+          column(12, h2("Note on Sampling and Estimating the True Error Rate")),
+          column(12, HTML("<span style='font-size: 20px;'><p>Since it's usually not possible to review every record, you select a smaller group (sample) to examine. The percentage of errors in your sample may differ slightly each time you draw a new sample. This variation happens naturally and means the sample’s error rate (i.e., estimated error rate) might not perfectly match the actual error rate of the full dataset (i.e., true error rate). </p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>To address this, the tool calculates a confidence interval—a range where the true error rate is likely to be. For example, if the confidence interval is 2%-5%, you can be 95% sure the true error rate falls within this range.</p></span>")),
+          column(12, h2("Why Sample Size Matters")),
+          column(12, HTML("<span style='font-size: 20px;'><p>The size of your sample affects the precision of your results:</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>•	Smaller sample sizes: More variation in error rates, leading to wider confidence intervals and less certainty.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>•	Larger sample sizes: Less variation, narrower confidence intervals, and greater confidence in your results.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>By choosing the right sample size, you can get reliable estimates without needing to review every record.</p></span>"))
         )
       ),
       
       # Second tab content
       tabItem(tabName = "sample_size",
-        h1("Plan Sample Size"),
+        h1("Defined Sample Size"),
+        p(HTML("<span style='font-size: 20px;'>Use this tab if you know the number of records you plan to review. This tab will show you how precisely you will be able to estimate your error rate with this sample size.</span>")),
+        p(HTML("<span style='font-size: 20px;'>We don't know what the true error rate of the algorithm is, and we also don't know how many errors we will find in a sample. Therefore, we need to make an educated guess about the error rate we expect. This is the <strong>anticipated error rate</strong>. Information from the TL2 phase of algorithm development may help inform what error rate is reasonable to expect.</span>")),
         box(
           title = "Input Parameters",
           width = 6,
           numericInput("n.charts", "How many charts will be reviewed? (Integer > 1)", 10, min = 1, max = 10000),
-          selectInput("conf.level", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95)
+          selectInput("conf.level", HTML("<span style='font-weight: normal;'> <b>What confidence level do you want?</b> <br> <small>* Default is 95%. The closer the number is to 1, the more confidence there is that the true error rate lies within the calculated range. A higher confidence level needs a larger sample.</small> </span>"), choices = c(0.90, 0.95, 0.99), selected = 0.95)
           # actionButton("update_plots", "Update Plots and Table")
         ),
         p(htmlOutput("tab2_text1")),
@@ -93,37 +104,38 @@ ui <- dashboardPage(
       # Third tab content
       tabItem(tabName = "confidence",
         h1("Error Rate Confidence"),
+        p(HTML("<span style='font-size: 20px;'>Use this tab if you need to determine if the algorithm’s error rate is below a specific limit and want a high level of certainty about your results.</span>")),
         box(
           title = "Input Parameters",
           width = 8,
           numericInput("exp.mer", "What is the maximum acceptable error rate (%) ?", 10, min = 0, max = 100),
-          numericInput("exp.er3", "What is your best guess of the algorithm error rate (%) ?", 5, min = 0, max = 100),
-          HTML("<p>*This value MUST be lower than than maximum acceptable error rate</p>"),
-          HTML("<p>*Information from the TL2 phase of algorithm development may help inform what error rate is reasonable to expect</p>"),
-          selectInput("conf.level3", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95)
+          numericInput("exp.er3", HTML("<span style='font-weight: normal;'> <b>What is the anticipated error rate (%)? </b> <br>
+                                       <small>* The anticipated error rate is your informed estimate of what the error rate might be before reviewing any records. This value MUST be lower than than maximum acceptable error rate</small> </span>") 
+                       , 5, min = 0, max = 100),
+          selectInput("conf.level3", HTML("<span style='font-weight: normal;'> <b>What confidence level do you want?</b> <br> <small>* Default is 95%. The closer the number is to 1, the more confidence there is that the true error rate lies within the calculated range. A higher confidence level needs a larger sample.</small> </span>"), choices = c(0.90, 0.95, 0.99), selected = 0.95)
         ),
         fluidRow(
-          column(10, p(htmlOutput("tab3_text1"))),
-          column(10, p(htmlOutput("tab3_text2"))),
-          column(10, plotOutput("tab3_plot1")),
-          column(10, p(htmlOutput("tab3_text3")))
+          column(12, p(htmlOutput("tab3_text1"))),
+          column(12, p(htmlOutput("tab3_text2"))),
+          column(12, plotOutput("tab3_plot1")),
+          column(12, p(htmlOutput("tab3_text3")))
         )
       ),
       # Fourth tab content
       tabItem(tabName = "estimation",
         h1("Error Rate Estimation"),
         fluidRow(
-          column(8, HTML("<span style='font-size: 20px;'>Once you have conducted a record review to validate the algorithm, you can use this page to estimate the confidence interval for the true error rate.<span>"))
+          column(12, HTML("<span style='font-size: 20px;'>Once you have conducted a record review to validate the algorithm, you can use this page to estimate the confidence interval for the true error rate.<span>"))
         ),
         box(
           title = "Input Parameters",
           width = 8,
           numericInput("chart.n.4", "Enter the number of records reviewed.", 70, min = 1, max = 100000),
           numericInput("err.n.4", "Enter the number of records where the algorithm was found to be erroneous.", 4, min = 0, max = 100000),
-          selectInput("conf.level4", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95)
+          selectInput("conf.level4", HTML("<span style='font-weight: normal;'> <b>What confidence level do you want?</b> <br> <small>* Default is 95%. The closer the number is to 1, the more confidence there is that the true error rate lies within the calculated range. A higher confidence level needs a larger sample.</small> </span>"), choices = c(0.90, 0.95, 0.99), selected = 0.95)
         ),
         fluidRow(
-          column(8, p(htmlOutput("tab4_text1")))
+          column(12, p(htmlOutput("tab4_text1")))
         )
       )
     )
@@ -147,7 +159,7 @@ server <- function(input, output,session) {
     n_charts <- as.numeric(input$n.charts)
     conf_level <- as.numeric(input$conf.level)
     err_n <- round(n_charts/10)
-    text <- paste("This figure shows the upper and lower confidence limits for the given sample size for an anticipated error rate. For example, if you think the error rate in ", 
+    text <- paste("This figure shows the upper and lower confidence limits for the given sample size for an anticipated error rate. For example, if the anticipated error rate in ", 
                   n_charts, "records is going to be",
                   round(err_n/n_charts*100,1), 
                   " %, then we are",

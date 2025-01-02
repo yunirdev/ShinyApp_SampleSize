@@ -33,8 +33,12 @@ Diff_SS <- function(margin, SD, ci.level=conf.level, corr=alg.cor){
 }
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Estimating the Margin of Error and Bias of an Algorithm", titleWidth = 400),
+  dashboardHeader(title = "Numeric Variables: Sample Size Estimator", titleWidth = 410),
   dashboardSidebar(
+    tags$div(
+      tags$img(src = "https://health.ucdavis.edu/data/includes/images/Img-cdev/icons/hac-logo.png", height = "100px"),
+      style = "text-align: center; padding: 10px;"
+    ),
     sidebarMenu(
       menuItem("Introduction", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Defined Sample Size", tabName = "definen", icon = icon("th")),
@@ -47,60 +51,62 @@ ui <- dashboardPage(
     tabItems(
       # First tab content
       tabItem(tabName = "dashboard",
-        h1("Introduction"),
+        h1("INTRODUCTION"),
         div(
-          p(HTML("<span style='font-size: 20px;'>This application provides guidance on the number of records to review to validate a numeric data asset algorithm and estimate the bias and error of the algorithm. For best results using this application, we recommend having an estimate of the mean and standard deviation of your data asset which may be available from TL2 or TL3 stages of algorithm development.</span>")),
-          p(HTML("<span style='font-size: 20px;'>There are three scenarios for sample size considerations and error determinations:</span>")),
+          p(HTML("<span style='font-size: 20px;'>This tool helps you decide how many records to review to evaluate the performance of a numeric data asset algorithm. It also estimates the algorithm’s bias and error rate for a numeric variable. For best results, it’s helpful to know the mean and standard deviation of your data, which you might have from earlier stages of algorithm development and data review.</span>")),
+          p(HTML("<span style='font-size: 20px;'>Use this tool for variables that are numbers such as heart rate, weight, length of stay, or count data like number of transfusions.  These are variables for which you can calculate an average (mean) and a standard deviation.  </span>")),
+          p(HTML("<span style='font-size: 20px;'>There are three main functions in the tool:</span>")),
           tags$ol(
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Defined SampleSize</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Defined Sample Size tab:</strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>If you want to understand how the number of records reviewed will affect the margin of error.</span>")
+                HTML("<span style='font-size: 20px;'>Use this tab if you know the number of records you can review. This tab will show you how precisely you will be able to estimate the margin of error.</span>")
               ))
             ),
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Defined Margin of Error</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Defined Margin of Error Tab: </strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>If you need to estimate the difference between the algorithm and the true value and have high confidence that the actual difference is within a specified amount.</span>")
+                HTML("<span style='font-size: 20px;'>Use this tab if you need to determine if the algorithm’s margin of error (i.e., how close is the estimated mean is to the true mean) is within a specific amount and want a high level of certainty about your results. </span>")
               ))
             ),
             tags$li(
-              HTML("<span style='font-size: 20px;'>Please go to the <strong>Bias and Error Estimation</strong> tab:</span>"),    
+              HTML("<span style='font-size: 20px;'><strong>Bias and Error Estimation Tab: </strong></span>"),    
               tags$ul(tags$li(
-                HTML("<span style='font-size: 20px;'>	If you want to estimate the algorithm's bias and error at a specified confidence level after you have validated the records through chart review. You can either manually input the information or upload the data directly. </span>")))
+                HTML("<span style='font-size: 20px;'>Once you have reviewed a sample of records, use this tab to estimate the algorithm’s bias and error. You can enter the information manually or upload the data.</span>")))
             )
           )
         ),
         fluidRow(
-          column(12, h2("Definitions:") ),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Margin of Error</u> - The margin of error is the difference between the mean of the data asset estimated with the algorithm and the true mean.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>True Mean </u> - This is the true mean value of data asset in the full data set. This value can only be known with certainty if all records are manually reviewed and every data point evaluated. </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Estimated Mean </u> - This is the estimated mean value from our sample through chart review, and it provides the best estimate of what the true value is. Because we cannot review every record in the data set, we draw a sample and use it to estimate the true mean value.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Anticipated Mean </u> - This is what you think the true mean value is. The sample size calculator requires you make an informed guess on the value you expect. You can use data obtained during TL2 and TL3 stages of development, the best judgement of the Subject Matter Experts as well as results from previous data exploration and targeted reviews as available to select this value.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>95% Confidence interval</u> - The 95% confidence interval represents a range of values within which we are 95% confident that the true mean exists. It's defined by a lower and upper limit, providing an estimation of where the actual parameter lies based on sample data.</p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><u><p>Bias</u> - The bias is the average difference between the algorithm value and the true value. A positive number indicates the algorithm value is higher than the true value. </p></span>")),
-          column(12, h2("A note on sampling and estimating the margin of error:")),
-          column(12, HTML("<span style='font-size: 20px;'><p>Because we cannot validate every record and data point, we draw a smaller sample and use that sample to estimate the mean of the entire population. But each time we draw a sample, the estimated mean in the sample will vary and thus our estimate of the true mean will vary. Further, due to this sampling variability, the difference between the estimated mean and the true mean (if we were to validate every record) will vary. </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><p>To account for sampling variability, we calculate a confidence interval. The confidence interval reflects the range in which our estimated mean would fall 95% of the time if we repeated the sampling many times. We expect the true mean to be within this confidence interval 95% of the time. </p></span>")),
-          column(12, HTML("<span style='font-size: 20px;'><p>With larger sample sizes we are less likely to get estimated means that differ markedly from the true means. As a result, the confidence interval is narrower leading to greater certainty about the range of possible values for the true mean.  </p></span>"))
+          column(12, h2("Key Terms:") ),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Margin of Error</u> - The difference between the estimated mean from the algorithm and the true mean.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>True Mean </u> - The actual average value of the data asset in the full dataset. This is known only if all records are reviewed.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Estimated Mean </u> - The average value estimated from the sample you reviewed. </p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Anticipated Mean </u> - Your informed estimate of the mean value before reviewing any records. This guess helps calculate the sample size and can be based on expert input or prior data reviews. </p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>95% Confidence interval</u> - The range where the true mean is expected to fall 95% of the time. It provides upper and lower limits for your estimate, helping you understand how precise your results are.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><u><p>Bias</u> - The average difference between the estimated mean and the true mean. A positive bias means the estimated mean is higher than the true mean.</p></span>")),
+          column(12, h2("Note on Sampling and Margin of Error")),
+          column(12, HTML("<span style='font-size: 20px;'><p>Because it's not practical to examine every single record, you look at a smaller group (called a sample). The average (or mean) from this sample can change slightly depending on which records are included. To account for this variability, we calculate a confidence interval—a range that shows where we expect the true average to fall most of the time. For example, if the confidence interval is 50 to 60, we can say we're 95% sure the true average lies somewhere in that range. Using larger samples helps reduce this uncertainty, making the range smaller and giving us more confidence in the result.</p></span>")),
+          column(12, h2("Why Sample Size Matters?")),
+          column(12, HTML("<span style='font-size: 20px;'><p>The size of your sample affects the precision of your results:</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>•	Smaller sample sizes: More variation in error rates, leading to wider confidence intervals and less certainty.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>•	Larger sample sizes: Less variation, narrower confidence intervals, and greater confidence in your results.</p></span>")),
+          column(12, HTML("<span style='font-size: 20px;'><p>By choosing the right sample size, you can get reliable estimates without needing to review every record.</p></span>"))
         )
       ),
       
       # third tab content
       tabItem(tabName = "definemoe",
         h1("Defined Margin of Error"),
+        p(HTML("<span style='font-size: 20px;'> Use this tab to determine the sample necessary to estimate the uncertainty in the algorithm, i.e., how close is the estimated mean to the true mean. </span>")),
         box(
           title = "Input Parameters",
           width = 12,
-          numericInput("alg.mean", "What is the anticipated mean of your data asset?", 5, min = -10000, max = 10000),
-          HTML("<p>*An estimate of the mean may be available from TL2 or TL3 stages of algorithm development.</p>"),
-          numericInput("alg.sd", "What is the standard deviation of your data asset?", 1, min = 0, max = 10000),
-          HTML("<p>*An estimate of the standard deviation may be available from TL2 or TL3 stages of algorithm development.</p>"),
-          numericInput("alg.cor", "What is the correlation expected between the algorithm and chart reviewed values?", 0.9, min = -1, max = 1),
-          HTML("<p>*This value probably is not known. As a default, we assume a high correlation (0.9); a value of 1 indicates perfect correlation. A larger sample size will be estimated if a lower correlation is assumed.</p>"),
-          selectInput("conf.level", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95),
-          textInput("Units", "What are the units of measurement for the data asset?", value = "", width = NULL, placeholder = NULL),
-          HTML("<p> <strong>Now, please indicate the desired precision as either the percentage difference <u>OR</u> absolute difference. </strong>This is the maximum acceptable difference between the true value and algorithm value difference.</p>"),
+          numericInput("alg.mean", HTML("<span style='font-weight: normal;'> <b>What is the anticipated mean of your data asset?</b><br><small>* Get this from the Data Profile output generated after algorithm logic is set.</small>"), 5, min = -10000, max = 10000),
+          numericInput("alg.sd", HTML("<span style='font-weight: normal;'> <b>What is the standard deviation of your data asset?</b><br><small>* Get this from the Data Profile output generated after algorithm logic is set.</small>"), 1, min = 0, max = 10000),
+          numericInput("alg.cor", HTML("<span style='font-weight: normal;'> <b>How well do you think the values from the algorithm logic will match to the values from the record review?</b><br><small>* Meaning how well will the estimate match the truth (correlation). Enter a number from 0 to 1, and 1 means 100% match.</small>"), 0.9, min = -1, max = 1),
+          selectInput("conf.level", HTML("<span style='font-weight: normal;'> <b>What confidence level do you want?</b><br><small>* The closer the number is to 1, the more confident you can be that the true value lies within a certain margin of error.</small>"), choices = c(0.90, 0.95, 0.99), selected = 0.95),
+          textInput("Units", HTML("<span style='font-weight: normal;'>(Optional) Enter the text of measurement units for report generating purpose, eg. lbs or days"), value = "", width = NULL, placeholder = NULL),
+          HTML("<span style='font-weight: normal;'> <b>Now, please indicate the desired precision as either the percentage difference <u>OR</u> absolute difference. </b>Precision is how close you want your estimated mean to be to the true mean. For example, if the true mean is 10 days and it is acceptable if your estimated mean is greater or less than the true been by 2 days, then the desired precision is 2.<br><small>* This is the maximum acceptable difference between the true value and algorithm value difference</small>"),
           # absolute.diff
           box(width = 6,
               numericInput("abs.diff", "Enter the desired precision for the mean difference between the algorithm and the true mean (#)?", 0.25, min = 0, max = 10000),
@@ -131,20 +137,20 @@ ui <- dashboardPage(
       # second tab content
       tabItem(tabName = "definen",
         h1("Defined Sample Size"),
+        p(HTML("<span style='font-size: 20px;'> Use this tab if you know the number of records you can review. This tab will show you how precisely you will be able to estimate the margin of error.</span>")),
         box(
           title = "Input Parameters",
           width = 12,
           numericInput("exp.n2", "How many charts will be reviewed?", 10, min = 1, max = 1000),
-          numericInput("exp.mean2", "What is the anticipated mean of your data asset?", 5, min = -10000, max = 10000),
-          HTML("<p> An estimate of the mean may be available from TL2 or TL3 stages of algorithm development.</p>"),
-          numericInput("sd2", "What is the standard deviation of your data asset?", 1, min = 0, max = 10000),
-          HTML("<p>An estimate of the standard deviation may be available from TL2 or TL3 stages of algorithm development.</p>"),
-          numericInput("corr2", "What is the correlation expected between the algorithm and chart reviewed values?", 0.9, min = 0, max = 1),
-          HTML("<p>*This value probably is not known. As a default, we assume a high correlation (0.9); a value of 1 indicates perfect correlation. A larger sample size will be estimated if a lower correlation is assumed.</p>"),
-          selectInput("conf.level2", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95),
-          textInput("Units2", "What are the units of measurement for the data asset?", value = "", width = NULL, placeholder = NULL),
-          column(12, p(htmlOutput("tab3_text1"))),
-          column(12, p(htmlOutput("tab3_text2")))
+          numericInput("exp.mean2", HTML("<span style='font-weight: normal;'> <b>What is the anticipated mean of your data asset?</b><br><small>* Get this from the Data Profile output generated after algorithm logic is set.</small>"), 5, min = -10000, max = 10000),
+          numericInput("sd2", HTML("<span style='font-weight: normal;'> <b>What is the standard deviation of your data asset?</b><br><small>* Get this from the Data Profile output generated after algorithm logic is set.</small>"), 1, min = 0, max = 10000),
+          numericInput("corr2", HTML("<span style='font-weight: normal;'> <b>How well do you think the values from the algorithm logic will match to the values from the record review?</b><br><small>* Meaning how well will the estimate match the truth (correlation). Enter a number from 0 to 1, and 1 means 100% match.</small>")
+                       , 0.9, min = 0, max = 1),
+          selectInput("conf.level2", HTML("<span style='font-weight: normal;'> <b>What confidence level do you want?</b><br><small>* Default is set to 0.95. The closer the number is to 1, the more confident you can be that the true value lies within a certain margin of error.</small>")
+                      , choices = c(0.90, 0.95, 0.99), selected = 0.95),
+          textInput("Units2", HTML("<span style='font-weight: normal;'>(Optional) Enter the text of measurement units for report generating purpose, eg. lbs or days</span>"), value = "", width = NULL, placeholder = NULL),
+          column(12, p(htmlOutput("tab3_text1")))#,
+          #column(12, p(htmlOutput("tab3_text2")))
         ),
         fluidRow(
           column(12, p(htmlOutput("tab3_text3"))),
@@ -165,7 +171,7 @@ ui <- dashboardPage(
       tabItem(tabName = "estimation",
         h1("Bias and Error Estimation"),
         fluidRow(
-          column(12, HTML("<span style='font-size: 20px;'>Once you have conducted a chart review to validate the algorithm, you can use this page to estimate bias and error of the algorithm. You can obtain the result by entering the required infomation <strong> OR </strong> by uploading the data. <span>"))
+          column(12, HTML("<span style='font-size: 20px;'>Once you have reviewed a sample of records, use this tab to estimate the algorithm’s bias and error. You can enter the information manually <strong>OR</strong> upload the data. <span>"))
         ),
         box(width = 12,
             selectInput("conf.level4", "What confidence level do you want?", choices = c(0.90, 0.95, 0.99), selected = 0.95),
@@ -481,9 +487,10 @@ server <- function(input, output,session) {
     MOE.GivenN <- Calc.MOE(n=exp.n, SD=sd, conf.level, corr=corr)
     
     text <- paste0("Is a margin of error of ",
-                     round(MOE.GivenN,1), " ", Units, " representing a ", round(100*MOE.GivenN/exp.mean,1), " % error acceptable? ", 
-                     "In other words, would it be acceptable if the algorithm yielded a mean estimate ",
-                     round(MOE.GivenN,1), " ", Units , " higher or lower than the true mean value?")
+                     round(MOE.GivenN,1), " ", Units, #" representing a ", round(100*MOE.GivenN/exp.mean,1), " % error",  
+                   "acceptable? ", 
+                   "In other words, would it be acceptable if the algorithm yielded a mean estimate ",
+                   round(MOE.GivenN,1), " ", Units , " higher or lower than the true mean value?")
     HTML(paste0("<span style='font-size: 30px;'>", text, "</span>"))
   })
   output$tab3_text3 <- renderUI({
@@ -600,10 +607,10 @@ tab3_text5 <- reactive({
     
     if (0<=conf.level){
       text <- paste0("The estimated bias of the algorithm is ",
-                     obs.diff, " with a ",
+                     round(obs.diff,3), " with a ",
                      conf.level*100, "% confidence interval of [",
-                     round(obs.diff-MOE.Est,2), ", ",
-                     round(obs.diff+MOE.Est,2), "] OR ",
+                     round(obs.diff-MOE.Est,3), ", ",
+                     round(obs.diff+MOE.Est,3), "] OR ",
                      round(obs.diff/chart.mean*100,2), "% [",
                      round((obs.diff-MOE.Est)/chart.mean*100,2), "%, ",
                      round((obs.diff+MOE.Est)/chart.mean*100,2), "%] in percentage change.",
